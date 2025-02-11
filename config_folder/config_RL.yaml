@@ -1,0 +1,81 @@
+defaults:
+  - _self_
+  - task@_global_: door
+  - replay_buffer@_global_: numpy
+  - agent@_global_: vrl3
+  - override hydra/launcher: submitit_local
+
+# task settings
+debug: 0
+# frame_stack: in paper actually used 3 as default for adroit, however
+# it can take a lot more memory especially for relocate, and later ablation shows
+# frame_stack does not affect performance significantly in Adroit, so here we set it to 1.
+frame_stack: 3
+action_repeat: 1
+discount: 0.99
+# eval
+eval_every_frames: 50000
+num_eval_episodes: 25
+# snapshot
+save_snapshot: false
+# replay buffer
+replay_buffer_size: 1000000
+replay_buffer_num_workers: 4
+nstep: 3
+batch_size: 256
+# misc
+seed: 1
+device: cuda
+save_video: false
+save_train_video: false
+use_tb: false
+save_models: false
+show_computation_time_est: true # provide estimates on computation times
+show_time_est_interval: 2500
+# experiment
+experiment: exp
+# expert data
+num_expert_episodes: 100
+# environment
+env_feature_type: 'pixels'
+use_sensor: true
+reward_rescale: true # TODO think about this...
+# agent
+lr: 1e-4
+feature_dim: 50
+
+# pretrained_encoder_config
+pretrained_encoder: false
+encoder_lr_scale: 1
+pretrained_encoder_model_name: 'resnet6_32channel'
+
+#RL+IL
+RL_plus_IL: false
+
+# ====== stage 1 ======
+stage1_model_name: 'resnet6_32channel' # model name example: resnet6_32channel, resnet6_64channel, resnet10_32channel
+stage1_use_pretrain: true # if false then we start from scratch
+
+# ====== stage 2 ======
+load_demo: true
+num_demo: 25
+stage2_n_update: 30000
+
+# ====== stage 3 ======
+num_seed_frames: 0
+
+
+hydra:
+  run: # this "dir" decides where the training logs are stored
+    dir: ./experiments/exp_${task_name}/RL_only/${agent_name}_pretrained_encoder=${pretrained_encoder}/${now:%H%M%S}_${hydra.job.override_dirname}
+  sweep:
+    dir: ./experiments/exp_${task_name}/RL_only/${agent_name}_pretrained_encoder=${pretrained_encoder}/
+    subdir: ${now:%Y.%m.%d}_${now:%H%M}_${hydra.job.override_dirname}
+  launcher:
+    timeout_min: 4300
+    cpus_per_task: 10
+    gpus_per_node: 1
+    tasks_per_node: 1
+    mem_gb: 160
+    nodes: 1
+    submitit_folder: ./experiments/exp_${task_name}/RL_only/${agent_name}_pretrained_encoder=${pretrained_encoder}/

@@ -1,0 +1,48 @@
+expert:
+  _target_: agents.vrl3_agent.VRL3Agent
+  obs_shape: ??? # to be specified later
+  obs_sensor_shape: ??? # to be specified later
+  action_shape: ??? # to be specified later
+  device: ${device}
+  critic_target_tau: 0.01
+  update_every_steps: 2
+  use_tb: ${use_tb}
+  lr: 1e-4
+  hidden_dim: 1024
+  feature_dim: 50
+
+  # environment related
+  use_sensor: ${use_sensor}
+
+  # ====== stage 1 ======
+  stage1_model_name: ${pretrained_encoder_model_name}
+
+  # ====== stage 2, 3 ======
+  use_data_aug: true
+  encoder_lr_scale: ${encoder_lr_scale}
+  stddev_clip: 0.3
+  # safe Q
+  safe_q_target_factor: 0.5 # value 1 is not using safe factor, value 0 is hard cutoff.
+  safe_q_threshold: 200
+  # pretanh penalty
+  pretanh_threshold: 5
+  pretanh_penalty: 0.001
+
+  # ====== stage 2 ======
+  stage2_update_encoder: true # decides whether encoder is frozen or finetune in stage 2
+  cql_weight: 1
+  cql_temp: 1
+  cql_n_random: 10
+  stage2_std: 0.1
+  stage2_bc_weight: 0 # ablation shows additional BC does not help performance
+
+  # ====== stage 3 ======
+  stage3_update_encoder: true
+  num_expl_steps: 0 # number of random actions at start of stage 3
+  # std decay
+  std0: 0.01
+  std1: 0.01
+  std_n_decay: 500000
+  # bc decay
+  stage3_bc_lam0: 0 # ablation shows additional BC does not help performance
+  stage3_bc_lam1: 0.95
