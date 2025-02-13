@@ -14,6 +14,7 @@ debug: 0
 # it can take a lot more memory especially for relocate, and later ablation shows
 # frame_stack does not affect performance significantly in Adroit, so here we set it to 1.
 frame_stack: 3
+frame_stack_expert: 3
 action_repeat: 1
 discount: 0.99
 # eval
@@ -23,6 +24,7 @@ num_eval_episodes: 25
 save_snapshot: false
 # replay buffer
 replay_buffer_size: 1000000
+expert_replay_buffer_size: 1000000
 replay_buffer_num_workers: 4
 nstep: 3
 batch_size: 256

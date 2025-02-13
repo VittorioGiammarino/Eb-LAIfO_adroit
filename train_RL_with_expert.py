@@ -138,7 +138,7 @@ class Workspace:
         self.expert_env = AdroitEnv(env_name_expert, 
                                     test_image=False, 
                                     num_repeats=self.cfg.action_repeat,
-                                    num_frames=self.cfg.frame_stack, 
+                                    num_frames=self.cfg.frame_stack_expert, 
                                     env_feature_type=self.env_feature_type,
                                     device=self.device, 
                                     reward_rescale=self.cfg.reward_rescale)
@@ -148,7 +148,7 @@ class Workspace:
                                 self.expert_env.action_spec(),
                                 self.cfg.expert)
         
-        self.replay_buffer_expert = hydra.utils.instantiate(self.cfg.replay_buffer)
+        self.replay_buffer_expert = hydra.utils.instantiate(self.cfg.replay_buffer_expert)
 
         self.video_recorder = VideoRecorder(self.work_dir if self.cfg.save_video else None)
         self.train_video_recorder = TrainVideoRecorder(self.work_dir if self.cfg.save_train_video else None)
@@ -377,7 +377,7 @@ def main(cfg):
     root_dir = Path.cwd()
     workspace = W(cfg)
     parent_dir = root_dir.parents[4]
-    snapshot = parent_dir / f'expert_policies/snapshot_{cfg.task_name_expert}_action_repeat={cfg.action_repeat}_frame_stack={cfg.frame_stack}.pt'
+    snapshot = parent_dir / f'expert_policies/snapshot_{cfg.task_name_expert}_action_repeat={cfg.action_repeat}_frame_stack={cfg.frame_stack_expert}.pt'
     print(snapshot)
     assert snapshot.exists()
     print(f'loading expert target: {snapshot}')
