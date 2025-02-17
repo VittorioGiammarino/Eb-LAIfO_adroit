@@ -69,7 +69,7 @@ class EventBasedTransform(nn.Module):
         self.theta = theta  # Brightness change threshold (in log intensity).
         self.noise_sigma = noise_sigma  # Standard deviation of Gaussian noise added to delta_log
 
-    def forward(self, obs, ref_log=None):
+    def forward(self, obs, ref_log=None, add_shift = True):
         """
         :param obs: (B, C, H, W), where C = 3 * num_frames (RGB frames concatenated in channels)
         :param ref_log: (B, 1, H, W) or None. If None, it's initialized with the first frame.
@@ -85,6 +85,15 @@ class EventBasedTransform(nn.Module):
             ref_log = ref_log.clone()  # Prevent modifying the external ref_log
 
         event_frames = []
+
+        if add_shift :
+            # Shift left (width dimension)
+            ref_log = ref_log.roll(shifts=-1, dims=3)  # Width shift
+            ref_log[..., -1] = 0  # Zero out last column
+
+            # Shift up (height dimension)
+            ref_log = ref_log.roll(shifts=-1, dims=2)  # Height shift
+            ref_log[..., -1, :] = 0  # Zero out last row
 
         for i in range(num_frames - 1):
             frame1 = rgb_to_grayscale(obs[:, 3*i:3*i+3, :, :])  # (B, 1, H, W)
